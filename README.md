@@ -4,14 +4,14 @@ Implementacija pipeline-a, opisanega v diplomski nalogi *"Nadgradnja slovenskega
 
 Pipeline omogoča dodajanje parajezikovnih oznak in zaznavanje emocij v transkripcijah zvočnih posnetkov, podanih v mapi `audio/`. Zvočni posnetki v tej mapi naj imajo končnico `.flac`
 
-ASR (Automatic Speech Recognition) proces ni del pipeline-a, zato sta kot vhod pričakovani naslednji datoteki:
+ASR (Automatic Speech Recognition) proces ni del pipeline-a, zato sta v korenskem imeniku pričakovani naslednji datoteki, formatirani skladno s konvencijami Kaldi:
 
 - `text` - vsebuje besedilne transkripcije zvočnih posnetkov
 - `wav.scp` - povezuje ID-je posnetkov z ustreznimi zvočnimi datotekami
 
 Vmesni in končni rezultati se shranjujejo v mapo `outputs/`.
 
-Repozitorij vključuje tudi kodo oziroma prilagoditve iz drugih odprtokodnih repozitorijev.
+Repozitorij vključuje tudi kodo iz drugih odprtokodnih repozitorijev.
 
 ## Namestitev
 
