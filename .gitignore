@@ -227,3 +227,6 @@ resources/*
 !resources/acoustic_model.zip
 !resources/dictionary.txt
 !resources/README.md
+
+text
+envs

@@ -2,10 +2,10 @@
 python create_corpus.py
 
 # Align captions
-conda run -p ./envs/aligner python align.py
+conda run -p ./envs/mfa python align.py
 
-conda run -p ./envs/aligner python textgrid2csv.py
-conda run -p ./envs/aligner python punctuate.py
+conda run -p ./envs/mfa python textgrid2csv.py
+conda run -p ./envs/mfa python punctuate.py
 
 # Get sound events
 conda run -p ./envs/ptsed python infer_sound.py
