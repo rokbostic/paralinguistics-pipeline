@@ -81,3 +81,13 @@ conda install -y -p "$ENV_PATH" -c conda-forge montreal-forced-aligner
 echo "mfa set up"
 
 echo "All environments set up"
+
+# =========================
+# ---- ENV: medmet ----
+# =========================
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install "nemo_toolkit[asr]"
+pip install python-dotenv
+pip install google-genai

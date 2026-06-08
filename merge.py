@@ -3,33 +3,30 @@ from pathlib import Path
 
 
 TAGS = {
-    "smeh":[
-    "Belly laugh",
-    "Chuckle, chortle",
-    "Giggle",
-    "Laughter",
-    "Snicker",
+    "smeh": [
+        "Belly laugh",
+        "Chuckle, chortle",
+        "Giggle",
+        "Laughter",
+        "Snicker",
     ],
-
-    "jok": [
-    "Crying, sobbing",
-    "Wail, moan",
+    "aplavz": [
+        "Applause",
+        "Clapping",
+        "Cheering",
     ],
-
-    "kaselj": [
-    "Cough",
-    "Throat clearing",
-    ],
-
     "dihanje": [
-    "Breathing",
-    "Respiratory sounds",
-    "Pant",
-    "Gasp",
-    "Sigh",
-    "Wheeze",
-    "Sniff",
-    ]
+        "Breathing",
+        "Respiratory sounds",
+        "Pant",
+        "Gasp",
+        "Sigh",
+        "Wheeze",
+        "Sniff",
+    ],
+    "medmet": [
+        "medmet",
+    ],
 }
 
 REVERSE_TAGS = {
@@ -38,43 +35,39 @@ REVERSE_TAGS = {
     for value in values
 }
 
-def read_events_csv(path):
 
+def read_events_csv(path):
     if not path.exists():
-        return None
+        return []
 
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        events = list(reader)
+        return list(reader)
 
-    return events
 
 def merge_with_overlap_markers(words, events):
     timeline = []
 
     EVENT_END = 0
-    EVENT_START = 2
     WORD = 1
+    EVENT_START = 2
 
-    # build timeline
     for e in events:
-
-        tag = REVERSE_TAGS.get(e["event_label"])
+        tag = REVERSE_TAGS.get(e.get("event_label"))
         if tag is None:
             continue
 
-        start = [e["offset"], EVENT_END, tag, None]
-        end = [e["onset"], EVENT_START, tag, start]
+        start = [e["onset"], EVENT_START, tag, None]
+        end = [e["offset"], EVENT_END, tag, start]
         start[3] = end
 
         timeline.append(start)
         timeline.append(end)
 
     for w in words:
-        word = [w["onset"], WORD, w["text"], None]
-        timeline.append(word)
+        timeline.append([w["onset"], WORD, w["text"], None])
 
-    timeline.sort(key=lambda x: (x[0], x[1], x[2]))
+    timeline.sort(key=lambda x: (float(x[0]), x[1], x[2]))
 
     for i in range(len(timeline)):
         timeline[i][0] = i
@@ -83,36 +76,33 @@ def merge_with_overlap_markers(words, events):
 
     for i, typ, text, link in timeline:
         if typ == EVENT_START:
-            if link[0] == i+1:
+            if link[0] == i + 1:
                 output.append(f"[{text}]")
-                continue
+            else:
+                output.append(f"<{text}>")
 
-            output.append(f"<{text}>")
-        
-        if typ == EVENT_END:
-            if link[0] == i-1:
+        elif typ == EVENT_END:
+            if link[0] == i - 1:
                 continue
-            
             output.append(f"</{text}>")
 
-        if typ == WORD:
+        elif typ == WORD:
             output.append(text)
 
     return " ".join(output)
 
-def main():
 
+def main():
     corpus_dir = Path("outputs/corpus")
 
     word_events_folder = Path("outputs/punctuate")
-    sound_events_folder = Path("outputs/sed")
-    
-    output_file = Path("outputs/text")
+    sound_events_folder = Path("outputs/medmet_sed")
+
+    output_file = Path("outputs/pipeline_text")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_file, "w", encoding="utf-8") as f:
         for audio in corpus_dir.glob("*.flac"):
-
             words_file = word_events_folder / audio.with_suffix(".csv").name
             sounds_file = sound_events_folder / audio.with_suffix(".csv").name
 
@@ -122,6 +112,7 @@ def main():
             merged_text = merge_with_overlap_markers(words, sounds)
 
             f.write(f"{words_file.stem} {merged_text}\n")
+
 
 if __name__ == "__main__":
     main()

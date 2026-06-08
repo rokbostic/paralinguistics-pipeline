@@ -230,3 +230,10 @@ resources/*
 
 text
 envs
+
+annotated_target_text
+annotated_target_emotions
+
+target.jsonl
+predicted.jsonl
+

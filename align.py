@@ -5,10 +5,8 @@ import tempfile
 
 BATCH_SIZE = 5000
 
-def main():
-    corpus_dir = Path("outputs/corpus")
+def main(corpus_dir: Path, output_dir: Path):
 
-    output_dir = Path("outputs/aligner")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     dictionary = Path("resources/dictionary.txt")
@@ -60,4 +58,12 @@ def main():
     align(files)
 
 if __name__ == "__main__":
-    main()
+    corpus_dir = Path("outputs/corpus")
+    output_dir = Path("outputs/aligner")
+
+    main(corpus_dir, output_dir)
+
+    corpus_dir = Path("outputs/medmet_corpus")
+    output_dir = Path("outputs/medmet_aligner")
+    
+    main(corpus_dir, output_dir)

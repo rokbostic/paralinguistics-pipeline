@@ -1,11 +1,30 @@
 from pathlib import Path
-import pandas as pd
+import random
 
-sed_outputs = Path("outputs") / "output_sed"
 
-for sed_output in sed_outputs.glob("*.csv"):
-    df = pd.read_csv(sed_output)
-    df = df[df.iloc[:, 0] != "Breathing"]
-    if not df.empty:
-        events = df.iloc[:, 0].to_list()
-        print(sed_output)
+audio_dir = Path("audio")
+
+filepaths = list(audio_dir.rglob("*.flac"))
+random.shuffle(filepaths)
+
+filepath = filepaths[0]
+utt = filepath.stem
+
+
+
+target_dir = Path("annotated_target_text")
+target_texts = dict(line.split(maxsplit=1) for line in target_dir.read_text().splitlines())
+
+gemini_dir = Path("outputs/gemini_text")
+gemini_texts = dict(line.split(maxsplit=1) for line in gemini_dir.read_text().splitlines())
+
+pipeline_dir = Path("outputs/pipeline_text")
+pipeline_texts = dict(line.split(maxsplit=1) for line in pipeline_dir.read_text().splitlines())
+
+print(utt)
+print()
+print(target_texts[utt])
+print()
+print(gemini_texts[utt])
+print()
+print(pipeline_texts[utt])

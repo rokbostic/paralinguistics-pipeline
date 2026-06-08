@@ -6,12 +6,11 @@ The files in audio are expected to be named the same as their utterance name in 
 
 from pathlib import Path
 
-def main():
+def create_corpus(input_fil: Path, output_dir: Path):
 
-    with open("text") as f:
+    with open(input_fil) as f:
         texts = {utt: txt for utt, txt in ([line.split()[0], " ".join(line.split()[1:])] for line in f)}
 
-    output_dir = Path("outputs/corpus")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     audio_dir = Path("audio")
@@ -30,4 +29,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    create_corpus(Path("text"), Path("outputs/corpus"))

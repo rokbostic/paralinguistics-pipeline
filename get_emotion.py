@@ -22,7 +22,7 @@ iic/emotion2vec_base_finetuned (Jan. 2024 release)
 EMOTION_MAP = {
     "neutral": "nevtralno",
     "happy": "sreča",
-    "disgusted": "gnus",
+    "angry": "jeza",
     "sad": "žalost",
     # else: "drugo"
 }
@@ -44,7 +44,7 @@ def main():
 
     corpus_dir = Path("outputs/corpus")
 
-    output_file = Path("outputs/emotions")
+    output_file = Path("outputs/pipeline_emotions")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     files = [str(f) for f in corpus_dir.rglob("*.flac")]
