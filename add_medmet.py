@@ -2,12 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 
+MODEL_NAME = "ATST"
 
 def main():
     medmet_dir = Path("outputs/medmet_aligner")
-    sed_dir = Path("outputs/sed")
 
-    output_dir = Path("outputs/medmet_sed")
+    sed_dir = Path("outputs/sed_"+MODEL_NAME)
+
+    output_dir = Path("outputs/medmet_sed_"+MODEL_NAME)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     files = list(medmet_dir.glob("*.csv"))

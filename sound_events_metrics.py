@@ -57,13 +57,13 @@ def calculate_metrics(pred_dir):
         eval_type="sequence",
         tag_type="by_type"
     )
-
+    print("EVALUATION RESULT FOR "+str(pred_dir))
     print(format_output_by_tag_type(results))
 
 
 
 if __name__ == "__main__":
 
-    #pred_dir = Path("outputs/gemini_text")
-    pred_dir = Path("outputs/pipeline_text")
+    pred_dir = Path("outputs/gemini_text")
+    #pred_dir = Path("outputs/pipeline_text_ATST")
     calculate_metrics(pred_dir)

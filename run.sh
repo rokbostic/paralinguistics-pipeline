@@ -6,7 +6,6 @@ python create_corpus.py
 
 # Align captions
 conda run -p ./envs/mfa python align.py
-
 conda run -p ./envs/mfa python textgrid2csv.py
 conda run -p ./envs/mfa python punctuate.py
 

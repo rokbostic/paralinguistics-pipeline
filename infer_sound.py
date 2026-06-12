@@ -18,11 +18,9 @@ from models.frame_mn.utils import NAME_TO_WIDTH
 from pathlib import Path
 import pandas as pd
 
-SAMPLE_RATE= 16000  # all our models are trained on 16 kHz audio
-SEGMENT_DURATION = 10  # all models are trained on 10-second pieces
-SEGMENT_SAMPLES = SEGMENT_DURATION * SAMPLE_RATE
+MODEL_NAME = "ATST"
 
-def create_model(device, model_type="ATST"):
+def create_model(device, model_type=MODEL_NAME):
 
     if model_type == "BEATS":
         beats = BEATsWrapper()
@@ -37,6 +35,9 @@ def create_model(device, model_type="ATST"):
 
     return model
 
+SAMPLE_RATE= 16000  # all our models are trained on 16 kHz audio
+SEGMENT_DURATION = 10  # all models are trained on 10-second pieces
+SEGMENT_SAMPLES = SEGMENT_DURATION * SAMPLE_RATE
 resampler = torchaudio.transforms.Resample(24000, SAMPLE_RATE)
 
 def load_audio(audio_file):
@@ -114,15 +115,14 @@ def sound_event_detection(audio_file, device, model, output_dir):
     #print(f"Saved to: {output_file}")
 
 
-if __name__ == "__main__":
-
+def main():
     corpus_dir = Path("outputs/corpus")
 
-    output_dir = Path("outputs/sed")
+    output_dir = Path("outputs/sed_" + MODEL_NAME)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    model = create_model(device)
+    model = create_model(device, MODEL_NAME)
         
     for filepath in corpus_dir.rglob("*.flac"):
         try:
@@ -132,3 +132,7 @@ if __name__ == "__main__":
             sound_event_detection(filepath, device, model, output_dir)
         except Exception as e:
             print(f"Failed on {filepath}: {e}")
+
+
+if __name__ == "__main__":
+    main()

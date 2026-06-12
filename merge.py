@@ -2,6 +2,9 @@ import csv
 from pathlib import Path
 
 
+MODEL_NAME = "ATST"
+
+
 TAGS = {
     "smeh": [
         "Belly laugh",
@@ -28,6 +31,8 @@ TAGS = {
         "medmet",
     ],
 }
+
+DISCRETE = {"dihanje", "medmet"}
 
 REVERSE_TAGS = {
     value: key
@@ -75,14 +80,14 @@ def merge_with_overlap_markers(words, events):
     output = []
 
     for i, typ, text, link in timeline:
-        if typ == EVENT_START:
+        if typ == EVENT_START or text in DISCRETE:
             if link[0] == i + 1:
                 output.append(f"[{text}]")
             else:
                 output.append(f"<{text}>")
 
         elif typ == EVENT_END:
-            if link[0] == i - 1:
+            if link[0] == i - 1 or text in DISCRETE:
                 continue
             output.append(f"</{text}>")
 
@@ -96,9 +101,9 @@ def main():
     corpus_dir = Path("outputs/corpus")
 
     word_events_folder = Path("outputs/punctuate")
-    sound_events_folder = Path("outputs/medmet_sed")
+    sound_events_folder = Path("outputs/medmet_sed_"+MODEL_NAME)
 
-    output_file = Path("outputs/pipeline_text")
+    output_file = Path("outputs/pipeline_text_"+MODEL_NAME)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_file, "w", encoding="utf-8") as f:
