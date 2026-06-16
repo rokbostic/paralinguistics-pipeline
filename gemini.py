@@ -34,15 +34,11 @@ PARALINGUISTIC RULES:
 
 Annotate paralinguistic events only when they are clearly audible. Only annotate the listed events.
 
-For short/discrete events occurring between words use:
+For events occurring in the sound file insert the following between words:
 [smeh]
 [dihanje]
 [medmet]
 [aplavz]
-
-For continuous events spanning multiple words use:
-<smeh> ... </smeh>
-<aplavz> ... </aplavz>
 
 Meaning of tags:
 - smeh = laughter, giggling, snickering and anything similar. Use continuous form if annotating laughter that lasts through multiple words.
@@ -54,7 +50,7 @@ EXAMPLES:
 
 Dober dan! Kako si kaj danes? Si dobro?
 ->
-{sreča} <smeh> Dober dan </smeh>! Kako si kaj danes? Si dobro?
+{sreča} Dober dan [smeh]! Kako si kaj danes? Si dobro?
 
 Gospod je poudaril, da je njihova prva odločitev za zeleno energijo pomembna tudi zaradi prihodka.
 ->

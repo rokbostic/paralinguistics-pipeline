@@ -11,7 +11,7 @@ from dataclasses import dataclass
 tags_1226_21 = ["smeh", "dihanje", "medmet", "aplavz"]
 tags_mapping_1226 = {"ALL": ["smeh", "dihanje", "medmet", "aplavz"]}
 
-tags_slovene_continous = ["smeh", "aplavz"]
+tags_slovene_continous = []
 
 @dataclass
 class EvaluationConfig:

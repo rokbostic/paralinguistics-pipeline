@@ -1,3 +1,8 @@
+
+PRED_DIR = "gemini_text"
+
+
+
 from pathlib import Path
 import json
 from eval.eval import (
@@ -64,6 +69,5 @@ def calculate_metrics(pred_dir):
 
 if __name__ == "__main__":
 
-    pred_dir = Path("outputs/gemini_text")
-    #pred_dir = Path("outputs/pipeline_text_ATST")
+    pred_dir = Path("outputs/" + PRED_DIR)
     calculate_metrics(pred_dir)

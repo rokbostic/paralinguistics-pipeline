@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 
 
-MODEL_NAME = "ATST"
+MODEL_NAME = "BEATS"
 
 
 TAGS = {
@@ -53,46 +53,31 @@ def read_events_csv(path):
 def merge_with_overlap_markers(words, events):
     timeline = []
 
-    EVENT_END = 0
-    WORD = 1
-    EVENT_START = 2
-
     for e in events:
         tag = REVERSE_TAGS.get(e.get("event_label"))
         if tag is None:
             continue
 
-        start = [e["onset"], EVENT_START, tag, None]
-        end = [e["offset"], EVENT_END, tag, start]
-        start[3] = end
-
-        timeline.append(start)
-        timeline.append(end)
+        timeline.append((e["onset"], 0, tag))
 
     for w in words:
-        timeline.append([w["onset"], WORD, w["text"], None])
+        timeline.append((w["onset"], 1, w["text"]))
 
     timeline.sort(key=lambda x: (float(x[0]), x[1], x[2]))
 
-    for i in range(len(timeline)):
-        timeline[i][0] = i
-
     output = []
 
-    for i, typ, text, link in timeline:
-        if typ == EVENT_START or text in DISCRETE:
-            if link[0] == i + 1:
+    used = set()
+
+    for i, typ, text in timeline:
+
+        if typ == 0:
+            if text not in used:
                 output.append(f"[{text}]")
-            else:
-                output.append(f"<{text}>")
-
-        elif typ == EVENT_END:
-            if link[0] == i - 1 or text in DISCRETE:
-                continue
-            output.append(f"</{text}>")
-
-        elif typ == WORD:
+                used.add(text)
+        else:
             output.append(text)
+            used = set()
 
     return " ".join(output)
 
