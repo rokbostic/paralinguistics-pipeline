@@ -76,8 +76,6 @@ from google import genai
 
 import random
 
-# ščž
-
 audio_models = [
     "gemini-2.5-pro",
     "gemini-2.5-flash",
@@ -90,8 +88,8 @@ def main():
 
     audio_files = list(audio_dir.rglob("*.flac"))
 
-    text_fil = Path("outputs/gemini_text")
-    emotions_fil = Path("outputs/gemini_emotions")
+    text_fil = Path("outputs/text_gemini")
+    emotions_fil = Path("outputs/emotions_gemini")
     
     text_fil.touch(exist_ok=True)
     emotions_fil.touch(exist_ok=True)

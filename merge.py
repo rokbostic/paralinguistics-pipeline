@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 
 
-MODEL_NAME = "BEATS"
+MODEL_NAME = "ATST"
 
 
 TAGS = {
@@ -32,30 +32,18 @@ TAGS = {
     ],
 }
 
-DISCRETE = {"dihanje", "medmet"}
-
 REVERSE_TAGS = {
     value: key
     for key, values in TAGS.items()
     for value in values
 }
 
-
-def read_events_csv(path):
-    if not path.exists():
-        return []
-
-    with open(path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        return list(reader)
-
-
 def merge_with_overlap_markers(words, events):
     timeline = []
 
     for e in events:
         tag = REVERSE_TAGS.get(e.get("event_label"))
-        if tag is None:
+        if tag is None: # we only allow the above listed tags
             continue
 
         timeline.append((e["onset"], 0, tag))
@@ -69,7 +57,7 @@ def merge_with_overlap_markers(words, events):
 
     used = set()
 
-    for i, typ, text in timeline:
+    for _, typ, text in timeline:
 
         if typ == 0:
             if text not in used:
@@ -83,21 +71,21 @@ def merge_with_overlap_markers(words, events):
 
 
 def main():
-    corpus_dir = Path("outputs/corpus")
+    audio_dir = Path("audio")
 
     word_events_folder = Path("outputs/punctuate")
     sound_events_folder = Path("outputs/medmet_sed_"+MODEL_NAME)
 
-    output_file = Path("outputs/pipeline_text_"+MODEL_NAME)
+    output_file = Path("outputs/text_"+MODEL_NAME)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_file, "w", encoding="utf-8") as f:
-        for audio in corpus_dir.glob("*.flac"):
+        for audio in audio_dir.glob("*.flac"):
             words_file = word_events_folder / audio.with_suffix(".csv").name
             sounds_file = sound_events_folder / audio.with_suffix(".csv").name
 
-            words = read_events_csv(words_file)
-            sounds = read_events_csv(sounds_file)
+            words = list(csv.DictReader(words_file.open(encoding="utf-8", newline=""))) if words_file.exists() else []
+            sounds = list(csv.DictReader(sounds_file.open(encoding="utf-8", newline=""))) if sounds_file.exists() else []
 
             merged_text = merge_with_overlap_markers(words, sounds)
 

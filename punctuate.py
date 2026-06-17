@@ -3,6 +3,29 @@ import csv
 import pandas as pd
 
 import re
+from textgrid import TextGrid
+import csv
+
+def textgrid2csv(aligner_dir: Path):
+    for file in aligner_dir.glob("*.TextGrid"):
+        
+        tg = TextGrid.fromFile(file)
+        tier = tg[0] # words - 0, phonemes - 1
+
+        output_file = file.with_suffix(".csv")
+
+        # Write CSV
+        with open(output_file, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["text", "onset", "offset"])
+
+            for interval in tier:
+                if interval.mark.strip():  # skip empty labels
+                    writer.writerow([
+                        interval.mark,
+                        interval.minTime,
+                        interval.maxTime
+                    ])
 
 def get_punctuated_orig(orig):
     word = ""
@@ -32,6 +55,12 @@ def get_punctuated_orig(orig):
     return words
 
 def main():
+
+    aligner_dir = Path("outputs/aligner")
+    textgrid2csv(aligner_dir)
+
+    aligner_dir = Path("outputs/medmet_aligner")
+    textgrid2csv(aligner_dir)
 
     with open("text") as f:
         text = {utt: txt for utt, txt in ([line.split()[0], " ".join(line.split()[1:])] for line in f)}

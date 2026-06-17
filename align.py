@@ -1,30 +1,39 @@
+BATCH_SIZE = 5000
+
 import subprocess
 import shutil
 from pathlib import Path
 import tempfile
+from tqdm import tqdm
 
-BATCH_SIZE = 5000
-
-def main(corpus_dir: Path, output_dir: Path):
-
+def main(texts_file, output_dir):
+    audio_dir = Path("audio")
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    filepaths = sorted(audio_dir.rglob("*.flac"))
+
+    done_stems = set()
+    for filepath in filepaths:
+        target_file = output_dir / filepath.with_suffix(".TextGrid").name
+        if target_file.exists():
+            done_stems.add(filepath.stem)
+    
+    filepaths = [p for p in filepaths if p.stem not in done_stems]
 
     dictionary = Path("resources/dictionary.txt")
     acoustic_model = Path("resources/acoustic_model.zip")
 
-    files = []
+    with open(texts_file) as f:
+        texts = {utt: txt for utt, txt in ([line.split()[0], " ".join(line.split()[1:])] for line in f)}
 
     def align(batch_files):
-        if not batch_files:
-            return
-
         with tempfile.TemporaryDirectory() as temp_folder:
             temp_folder = Path(temp_folder)
 
-            # Copy files into temp folder
-            for src in batch_files:
-                if src.exists():
-                    shutil.copy2(src, temp_folder / src.name)
+            for pathfile in batch_files:
+                shutil.copy2(pathfile, temp_folder / pathfile.name)    
+                text = texts[pathfile.stem]
+                (temp_folder / pathfile.with_suffix(".txt")).write_text(text)
 
             com = [
                 "mfa", "align",
@@ -38,32 +47,15 @@ def main(corpus_dir: Path, output_dir: Path):
                 "--num_jobs", "2",
             ]
 
-            print(f"Running: {' '.join(com)}")
             subprocess.run(com, check=True)
-            print("Alignment complete for batch!")
 
-    for filepath in corpus_dir.rglob("*.flac"):
-        output_csv = output_dir / filepath.with_suffix(".TextGrid").name
+    with tqdm(total=len(filepaths), desc=f"Aligning: ", unit="file") as pbar:
+        for i in range(0, len(filepaths), BATCH_SIZE):
+            batch = filepaths[i:i + BATCH_SIZE]
+            align(batch)
+            pbar.update(len(batch))
 
-        if output_csv.exists():
-            continue
-
-        files.append(filepath)
-        files.append(filepath.with_suffix(".txt"))
-
-        if len(files) >= BATCH_SIZE:
-            align(files)
-            files.clear()
-
-    align(files)
 
 if __name__ == "__main__":
-    corpus_dir = Path("outputs/corpus")
-    output_dir = Path("outputs/aligner")
-
-    main(corpus_dir, output_dir)
-
-    corpus_dir = Path("outputs/medmet_corpus")
-    output_dir = Path("outputs/medmet_aligner")
-    
-    main(corpus_dir, output_dir)
+    main(Path("outputs/corpus"), Path("outputs/aligner"))
+    main(Path("outputs/medmet_corpus"), Path("outputs/medmet_aligner"))

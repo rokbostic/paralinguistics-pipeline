@@ -107,29 +107,38 @@ def sound_event_detection(audio_file, device, model, output_dir):
         thresholds=[threshold],
     )
 
-    predictions = decoded_predictions[threshold].sort_values(by="onset")   
+    predictions = decoded_predictions[threshold].sort_values(by="onset")
 
-    output_file = output_dir / audio_file.with_suffix(".csv").name
-    df = pd.DataFrame(predictions)
-    df.to_csv(output_file, index=False)
-    #print(f"Saved to: {output_file}")
+    return predictions
 
 
 def main():
-    corpus_dir = Path("outputs/corpus")
+    audio_dir = Path("outputs/corpus") 
 
     output_dir = Path("outputs/sed_" + MODEL_NAME)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model = create_model(device, MODEL_NAME)
-        
-    for filepath in corpus_dir.rglob("*.flac"):
-        try:
-            if (output_dir / filepath.with_suffix(".csv").name).exists():
-                continue
 
-            sound_event_detection(filepath, device, model, output_dir)
+    filepaths = sorted(audio_dir.rglob("*.flac"))
+
+    done_stems = set()
+    for filepath in filepaths:
+        target_file = output_dir / filepath.with_suffix(".csv").name
+        if target_file.exists():
+            done_stems.add(filepath.stem)
+    
+    filepaths = [p for p in filepaths if p.stem not in done_stems]
+        
+    for filepath in filepaths:
+        try:
+            predictions = sound_event_detection(filepath, device, model, output_dir)
+            
+            output_file = output_dir / filepath.with_suffix(".csv").name 
+            df = pd.DataFrame(predictions)
+            df.to_csv(output_file, index=False)
+
         except Exception as e:
             print(f"Failed on {filepath}: {e}")
 

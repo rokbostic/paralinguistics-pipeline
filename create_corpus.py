@@ -1,9 +1,3 @@
-"""
-Creates a corpus in outputs/aligner which the MFA can read in the next step of the pipeline.
-
-The files in audio are expected to be named the same as their utterance name in wav.scp with a .flac suffix.
-"""
-
 from pathlib import Path
 
 def create_corpus(input_fil: Path, output_dir: Path):
@@ -30,3 +24,4 @@ def create_corpus(input_fil: Path, output_dir: Path):
 
 if __name__ == "__main__":
     create_corpus(Path("text"), Path("outputs/corpus"))
+    create_corpus(Path("outputs/medmet"), Path("outputs/medmet_corpus"))

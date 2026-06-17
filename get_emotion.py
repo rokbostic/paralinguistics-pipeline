@@ -1,3 +1,13 @@
+from funasr import AutoModel
+import torch
+import librosa
+from transformers import AutoFeatureExtractor, AutoModelForAudioClassification
+
+from tqdm import tqdm
+
+from pathlib import Path
+import re
+
 EMOTION_MAP = {
     "neutral": "nevtralno",
     "Neutral": "nevtralno",
@@ -25,44 +35,53 @@ EMOTION_MAP = {
     # else: "drugo"
 }
 
-from funasr import AutoModel
-from pathlib import Path
+BATCH_SIZE = 64
 
-def emotion2vec():
+def emotions_emotion2vec():
     model_id = "iic/emotion2vec_plus_large"
     model = AutoModel(model=model_id, hub="ms")
 
-    corpus_dir = Path("outputs/corpus")
+    audio_dir = Path("audio")
 
-    output_file = Path("outputs/pipeline_emotions_emotion2vec")
+    output_file = Path("outputs/emotions_emotion2vec")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    files = [str(f) for f in corpus_dir.rglob("*.flac")]
-    rec_result = model.generate(files, granularity="utterance", extract_embedding=False)
+    done = {line.partition(" ")[0] for line in output_file.open()} if output_file.exists() else set()
 
-    with open(output_file, "w", encoding="utf-8") as f:
-        for r in rec_result:
-            item = r
-            key = item["key"]
-            emotion = max(zip(item["scores"], item["labels"]))[1].split("/")[-1]
+    filepaths = sorted(str(f) for f in audio_dir.rglob("*.flac"))
+    filepaths = [p for p in filepaths if Path(p).stem not in done]
 
-            emotion = EMOTION_MAP.get(emotion, "drugo")
-            f.write(f"{key} {emotion}\n")
+    with open(output_file, "a", encoding="utf-8") as f:
+        with tqdm(total=len(filepaths), desc="Getting emotions", unit="file") as pbar:
 
-import re
+            for i in range(0, len(filepaths), BATCH_SIZE):
+                batch = filepaths[i:i + BATCH_SIZE]
+                result = model.generate(batch, granularity="utterance", extract_embedding=False)
 
-def sensevoice_emotions():
-    model = AutoModel(
-        model="iic/SenseVoiceSmall",
-        hub="ms",
-        ban_emo_unk=True,
-    )
+                for item in result:
+                    key = item["key"]
+                    emotion = max(zip(item["scores"], item["labels"]))[1].split("/")[-1]
+                    emotion = EMOTION_MAP.get(emotion, "drugo")
+                    f.write(f"{key} {emotion}\n")
 
-    corpus_dir = Path("outputs/corpus")
-    output_file = Path("outputs/pipeline_emotions_sensevoice")
+                f.flush()
+                pbar.update(len(batch))
+
+
+
+
+
+
+def emotions_sensevoice():
+    model_id = "iic/SenseVoiceSmall"
+    model = AutoModel(model=model_id, hub="ms", ban_emo_unk=True,)
+
+    audio_dir = Path("audio")
+
+    output_file = Path("outputs/emotions_sensevoice")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    files = sorted(corpus_dir.rglob("*.flac"))
+    files = sorted(str(f) for f in audio_dir.rglob("*.flac"))
 
     with open(output_file, "w", encoding="utf-8") as f:
         for file_path in files:
@@ -82,11 +101,7 @@ def sensevoice_emotions():
 
             f.write(f"{key} {emotion}\n")
 
-import torch
-import librosa
-from transformers import AutoFeatureExtractor, AutoModelForAudioClassification
-
-def emotions(model_str):
+def emotions_huggingface(model_str):
 
     if model_str == "hubert":
         model_name = "superb/hubert-large-superb-er"
@@ -101,7 +116,7 @@ def emotions(model_str):
 
     corpus_dir = Path("outputs/corpus")
 
-    output_file = Path("outputs/pipeline_emotions_"+model_str) 
+    output_file = Path("outputs/emotions_"+model_str) 
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     files = sorted(corpus_dir.rglob("*.flac"))
@@ -138,14 +153,15 @@ def emotions(model_str):
 if __name__ == "__main__":
 
     # IMPLEMENTED emotion2vec, sensevoice, hubert, wav2vec2 
+    MODEL_NAME = "emotion2vec"
 
-    MODEL_NAME = "hubert"
+    if MODEL_NAME == "emotion2vec": # implements batching
+        emotions_emotion2vec()
 
-    if MODEL_NAME == "emotion2vec":
-        emotion2vec()
+
     elif MODEL_NAME == "sensevoice":
-        sensevoice_emotions()
+        emotions_sensevoice()
     elif MODEL_NAME == "wav2vec2":
-        emotions("wav2vec2")
+        emotions_huggingface("wav2vec2")
     elif MODEL_NAME == "hubert":
-        emotions("hubert")
+        emotions_huggingface("hubert")
