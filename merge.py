@@ -1,6 +1,8 @@
 import csv
 from pathlib import Path
 
+from tqdm import tqdm
+
 
 MODEL_NAME = "ATST"
 
@@ -80,7 +82,7 @@ def main():
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_file, "w", encoding="utf-8") as f:
-        for audio in audio_dir.glob("*.flac"):
+        for audio in tqdm(list(audio_dir.rglob("*.flac"))):
             words_file = word_events_folder / audio.with_suffix(".csv").name
             sounds_file = sound_events_folder / audio.with_suffix(".csv").name
 

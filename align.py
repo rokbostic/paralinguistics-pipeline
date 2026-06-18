@@ -31,9 +31,12 @@ def main(texts_file, output_dir):
             temp_folder = Path(temp_folder)
 
             for pathfile in batch_files:
-                shutil.copy2(pathfile, temp_folder / pathfile.name)    
+                shutil.copy2(pathfile, temp_folder / pathfile.name)
+
                 text = texts[pathfile.stem]
-                (temp_folder / pathfile.with_suffix(".txt")).write_text(text)
+
+                txt_path = (temp_folder / pathfile.name).with_suffix(".txt")
+                txt_path.write_text(text)
 
             com = [
                 "mfa", "align",
@@ -44,7 +47,7 @@ def main(texts_file, output_dir):
                 "--clean",
                 "--overwrite",
                 "--single_speaker",
-                "--num_jobs", "2",
+                "--num_jobs", "4",
             ]
 
             subprocess.run(com, check=True)
@@ -57,5 +60,5 @@ def main(texts_file, output_dir):
 
 
 if __name__ == "__main__":
-    main(Path("outputs/corpus"), Path("outputs/aligner"))
-    main(Path("outputs/medmet_corpus"), Path("outputs/medmet_aligner"))
+    main(Path("text"), Path("outputs/aligner"))
+    main(Path("outputs/medmet"), Path("outputs/medmet_aligner"))

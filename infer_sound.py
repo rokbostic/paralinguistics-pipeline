@@ -18,6 +18,9 @@ from models.frame_mn.utils import NAME_TO_WIDTH
 from pathlib import Path
 import pandas as pd
 
+from tqdm import tqdm
+import sys
+
 MODEL_NAME = "ATST"
 
 def create_model(device, model_type=MODEL_NAME):
@@ -78,7 +81,7 @@ def load_chunks(audio_file):
     return chunks, audio_len
 
 
-def sound_event_detection(audio_file, device, model, output_dir):
+def sound_event_detection(audio_file, device, model):
     
     chunks, audio_len = load_chunks(audio_file)
     chunks = chunks.to(device, non_blocking=True)
@@ -131,9 +134,10 @@ def main():
     
     filepaths = [p for p in filepaths if p.stem not in done_stems]
         
-    for filepath in filepaths:
+
+    for filepath in tqdm(filepaths):
         try:
-            predictions = sound_event_detection(filepath, device, model, output_dir)
+            predictions = sound_event_detection(filepath, device, model)
             
             output_file = output_dir / filepath.with_suffix(".csv").name 
             df = pd.DataFrame(predictions)

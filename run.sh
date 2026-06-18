@@ -1,18 +1,16 @@
-# Create corpus
-python create_corpus.py
-
 # Get medmet
 .venv/bin/python get_medmet.py
 
 # Align captions
-conda run -p ./envs/mfa python align.py
-conda run -p ./envs/mfa python textgrid2csv.py
-conda run -p ./envs/mfa python punctuate.py
+.venv/bin/python create_corpus.py
+conda run --no-capture-output -p ./envs/mfa python -u align.py
 
 # Get sound events
-conda run -p ./envs/ptsed python infer_sound.py
-.venv/bin/python add_medmet.py
-python merge.py
+conda run --no-capture-output -p ./envs/ptsed python -u infer_sound.py
 
 # Get emotions
 conda run -p ./envs/emotion python get_emotion.py
+
+.venv/bin/python punctuate.py
+.venv/bin/python add_medmet.py
+.venv/bin/python merge.py

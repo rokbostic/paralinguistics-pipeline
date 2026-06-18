@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+from tqdm import tqdm 
 
 MODEL_NAME = "ATST"
 
@@ -12,14 +13,23 @@ def main():
     output_dir = Path("outputs/medmet_sed_"+MODEL_NAME)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    files = list(medmet_dir.glob("*.csv"))
+    filepaths = sorted(medmet_dir.glob("*.csv"))
 
-    for file in files:
-        if file.stem == "alignment_analysis":
+    done_stems = set()
+    for filepath in filepaths:
+        target_file = output_dir / filepath.with_suffix(".csv").name
+        if target_file.exists():
+            done_stems.add(filepath.stem)
+    
+    filepaths = [p for p in filepaths if p.stem not in done_stems]
+
+
+    for filepath in tqdm(filepaths):
+        if filepath.stem == "alignment_analysis":
             continue
-        utt = file.stem
+        utt = filepath.stem
 
-        medmet_events = pd.read_csv(file)
+        medmet_events = pd.read_csv(filepath)
 
         sed_file = sed_dir / f"{utt}.csv"
         output_file = output_dir / f"{utt}.csv"
