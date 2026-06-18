@@ -34,10 +34,10 @@ def textgrid2csv(aligner_dir: Path):
 def main():
 
     aligner_dir = Path("outputs/aligner")
-    #textgrid2csv(aligner_dir)
+    textgrid2csv(aligner_dir)
 
     aligner_dir = Path("outputs/medmet_aligner")
-    #textgrid2csv(aligner_dir)
+    textgrid2csv(aligner_dir)
 
     with open("text") as f:
         text = {utt: txt for utt, txt in ([line.split()[0], " ".join(line.split()[1:])] for line in f)}

@@ -1,10 +1,7 @@
 
-PRED_DIR = "gemini_text"
-
-
-
 from pathlib import Path
 import json
+import re
 from eval.eval import (
     evaluate,
     EvaluationConfig,
@@ -63,11 +60,34 @@ def calculate_metrics(pred_dir):
         tag_type="by_type"
     )
     print("EVALUATION RESULT FOR "+str(pred_dir))
-    print(format_output_by_tag_type(results))
+    res_print = format_output_by_tag_type(results)
+    res_print = res_print.split("## Continuous tags <tag>")[0]
+    
+    #print(res_print)
+
+
+    micro_match = re.search(
+    r"\|Micro\|\s*[\d.]+\|\s*[\d.]+\|\s*([\d.]+)\|",
+    res_print
+    )
+
+    macro_match = re.search(
+        r"\|Macro\|\s*[\d.]+\|\s*[\d.]+\|\s*([\d.]+)\|",
+        res_print
+    )
+
+    micro_f1 = float(micro_match.group(1))
+    macro_f1 = float(macro_match.group(1))
+
+    print(f"Micro F1: {micro_f1:.3f}")
+    print(f"Macro F1: {macro_f1:.3f}")
 
 
 
 if __name__ == "__main__":
 
-    pred_dir = Path("outputs/" + PRED_DIR)
-    calculate_metrics(pred_dir)
+    paths = list(Path("outputs").glob("text*"))
+
+    for path in paths:
+        if path.exists():
+            calculate_metrics(path)

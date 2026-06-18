@@ -1,4 +1,5 @@
 from pathlib import Path
+from tqdm import tqdm
 
 def create_corpus(input_fil: Path, output_dir: Path):
 
@@ -8,7 +9,9 @@ def create_corpus(input_fil: Path, output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     audio_dir = Path("audio")
-    for filepath in audio_dir.rglob("*.flac"):
+    filepaths = list(audio_dir.rglob("*.flac"))
+
+    for filepath in tqdm(filepaths):
         utt = filepath.with_suffix("").name
         text = texts[utt]
 

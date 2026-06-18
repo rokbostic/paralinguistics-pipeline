@@ -217,16 +217,12 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-audio/*
-outputs/*
-
-!audio/README.md
-!outputs/README.md
+audio
+outputs
 
 resources/*
 !resources/acoustic_model.zip
 !resources/dictionary.txt
-!resources/README.md
 
 text
 envs

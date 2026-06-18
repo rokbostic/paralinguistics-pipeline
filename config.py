@@ -26,3 +26,46 @@ CHECKPOINT_URLS['ATST-F_ssl'] = GITHUB_RELEASE_URL + "ATST-F_ssl.pt"
 CHECKPOINT_URLS['ASIT_ssl'] = GITHUB_RELEASE_URL + "ASIT_ssl.pt"
 CHECKPOINT_URLS['fpasst_ssl'] = GITHUB_RELEASE_URL + "fpasst_ssl.pt"
 CHECKPOINT_URLS['M2D_ssl'] = GITHUB_RELEASE_URL + "M2D_ssl.pt"
+
+
+# -----------------------------------------------------------------------------------------------
+
+SED_TAGS = {
+    "smeh": [
+        "Belly laugh",
+        "Chuckle, chortle",
+        "Giggle",
+        "Laughter",
+        "Snicker",
+    ],
+    "aplavz": [
+        "Applause",
+        "Clapping",
+        "Cheering",
+    ],
+    "dihanje": [
+        "Breathing",
+        "Respiratory sounds",
+        "Pant",
+        "Gasp",
+        "Sigh",
+        "Wheeze",
+        "Sniff",
+    ],
+    "medmet": [
+        "medmet",
+    ],
+}
+
+SED_REVERSE_TAGS = {
+    value: key
+    for key, values in SED_TAGS.items()
+    for value in values
+}
+
+
+SED_MODEL_NAME = "ATST" # ASTS, BEATS
+
+SED_THRESHOLD = 0.2 # 0.05, 0.1, 0.2, 0.3, 0.5
+
+SED_MEDIAN_FILTER = 9 # 3, 6, 9, 12, 15

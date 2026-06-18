@@ -71,7 +71,6 @@ def calculate_metrics(pred_dir):
 
 
 if __name__ == "__main__":
-    
 
     paths = [
         Path("outputs/gemini_emotions"),
@@ -82,6 +81,5 @@ if __name__ == "__main__":
         ]
 
     for path in paths:
-    
-        data = calculate_metrics(path)
-        print(data)
+        if path.exists():
+            calculate_metrics(path)

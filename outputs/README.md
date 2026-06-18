@@ -1,1 +1,0 @@
-Outputs go in this folder.
