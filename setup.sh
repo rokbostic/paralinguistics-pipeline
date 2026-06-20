@@ -80,14 +80,29 @@ conda install -y -p "$ENV_PATH" -c conda-forge montreal-forced-aligner
 
 echo "mfa set up"
 
+# =========================
+# ---- ENV: .venv ----
+# =========================
+
+VENV_PATH=".venv"
+VENV_PYTHON="$VENV_PATH/bin/python"
+
+if [ ! -d "$VENV_PATH" ]; then
+    echo "Creating .venv with Python 3.12..."
+    python3.12 -m venv "$VENV_PATH"
+else
+    echo ".venv already exists."
+fi
+
+"$VENV_PYTHON" -m pip install --upgrade pip setuptools wheel
+
+"$VENV_PYTHON" -m pip install \
+    "nemo_toolkit[asr]" \
+    pandas \
+    textgrid \
+    tqdm \
+    pypinyin
+
+echo ".venv set up"
+
 echo "All environments set up"
-
-# =========================
-# ---- ENV: medmet ----
-# =========================
-
-python3 -m venv .venv
-source .venv/bin/activate
-pip install "nemo_toolkit[asr]"
-pip install python-dotenv
-pip install google-genai

@@ -63,8 +63,8 @@ def calculate_metrics(pred_dir):
     res_print = format_output_by_tag_type(results)
     res_print = res_print.split("## Continuous tags <tag>")[0]
     
-    #print(res_print)
-
+    print(res_print)
+    """
 
     micro_match = re.search(
     r"\|Micro\|\s*[\d.]+\|\s*[\d.]+\|\s*([\d.]+)\|",
@@ -81,6 +81,8 @@ def calculate_metrics(pred_dir):
 
     print(f"Micro F1: {micro_f1:.3f}")
     print(f"Macro F1: {macro_f1:.3f}")
+
+    """
 
 
 
