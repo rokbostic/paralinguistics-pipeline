@@ -235,3 +235,5 @@ predicted.jsonl
 
 benchmark_data.py
 benchmark
+
+utt2arousal
