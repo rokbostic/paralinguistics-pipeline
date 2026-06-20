@@ -13,7 +13,9 @@ def create_corpus(input_fil: Path, output_dir: Path):
 
     for filepath in tqdm(filepaths):
         utt = filepath.with_suffix("").name
-        text = texts[utt]
+        text = texts.get(utt)
+        if text is None:
+            continue
 
         sym_path = output_dir / filepath.name
         txt_path = output_dir / filepath.with_suffix(".txt").name
