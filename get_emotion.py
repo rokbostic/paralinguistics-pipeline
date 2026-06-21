@@ -101,63 +101,132 @@ def emotions_sensevoice():
 
             f.write(f"{key} {emotion}\n")
 
-def emotions_huggingface(model_str):
+
+
+
+
+def emotions_huggingface(model_str, batch_size=16):
 
     if model_str == "hubert":
         model_name = "superb/hubert-large-superb-er"
-
     elif model_str == "wav2vec2":
         model_name = "superb/wav2vec2-large-superb-er"
+    else:
+        raise ValueError(f"Unsupported model: {model_str}")
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device:", device)
 
     extractor = AutoFeatureExtractor.from_pretrained(model_name)
+
     model = AutoModelForAudioClassification.from_pretrained(model_name)
+    model.to(device)
     model.eval()
+
     print(model.config.id2label)
 
     audio_dir = Path("audio")
 
-    output_file = Path("outputs/emotions_"+model_str) 
+    output_file = Path(f"outputs/emotions_{model_str}")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    done = {line.partition(" ")[0] for line in output_file.open()} if output_file.exists() else set()
+    done = (
+        {line.partition(" ")[0] for line in output_file.open()}
+        if output_file.exists()
+        else set()
+    )
 
-    filepaths = sorted(str(f) for f in audio_dir.rglob("*.flac"))
-    filepaths = [p for p in filepaths if Path(p).stem not in done]
+    filepaths = sorted(audio_dir.rglob("*.flac"))
+    filepaths = [p for p in filepaths if p.stem not in done]
+
+    print(f"Remaining files: {len(filepaths)}")
 
     with open(output_file, "a", encoding="utf-8") as f:
+
+        batch_audio = []
+        batch_keys = []
+
         for filepath in tqdm(filepaths):
-            # Load 24 kHz FLAC and resample to 16 kHz
+
             audio, _ = librosa.load(
                 filepath,
                 sr=16000,
                 mono=True
             )
 
+            batch_audio.append(audio)
+            batch_keys.append(filepath.stem)
+
+            if len(batch_audio) < batch_size:
+                continue
+
             inputs = extractor(
-                audio,
+                batch_audio,
                 sampling_rate=16000,
+                padding=True,
                 return_tensors="pt"
             )
 
-            with torch.no_grad():
+            inputs = {
+                k: v.to(device)
+                for k, v in inputs.items()
+            }
+
+            with torch.inference_mode():
                 logits = model(**inputs).logits
 
-            probs = torch.softmax(logits, dim=-1)[0]
-            pred_id = torch.argmax(probs).item()
+            pred_ids = logits.argmax(dim=-1).tolist()
 
-            emotion = model.config.id2label[pred_id].lower()
-            emotion = emotion.split("/")[-1]
+            for key, pred_id in zip(batch_keys, pred_ids):
 
-            emotion = EMOTION_MAP.get(emotion, "drugo")
+                emotion = model.config.id2label[pred_id].lower()
+                emotion = emotion.split("/")[-1]
+                emotion = EMOTION_MAP.get(emotion, "drugo")
 
-            key = Path(filepath).stem
-            f.write(f"{key} {emotion}\n")
+                f.write(f"{key} {emotion}\n")
+
             f.flush()
+
+            batch_audio.clear()
+            batch_keys.clear()
+
+        # Process final partial batch
+        if batch_audio:
+
+            inputs = extractor(
+                batch_audio,
+                sampling_rate=16000,
+                padding=True,
+                return_tensors="pt"
+            )
+
+            inputs = {
+                k: v.to(device)
+                for k, v in inputs.items()
+            }
+
+            with torch.inference_mode():
+                logits = model(**inputs).logits
+
+            pred_ids = logits.argmax(dim=-1).tolist()
+
+            for key, pred_id in zip(batch_keys, pred_ids):
+
+                emotion = model.config.id2label[pred_id].lower()
+                emotion = emotion.split("/")[-1]
+                emotion = EMOTION_MAP.get(emotion, "drugo")
+
+                f.write(f"{key} {emotion}\n")
+
+            f.flush()
+
+
+
 
 if __name__ == "__main__":
 
     # IMPLEMENTED emotion2vec, sensevoice, hubert, wav2vec2 
-    MODEL_NAME = "emotion2vec"
+    MODEL_NAME = "wav2vec2"
 
     if MODEL_NAME == "emotion2vec": # implements batching
         emotions_emotion2vec()

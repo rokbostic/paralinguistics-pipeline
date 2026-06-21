@@ -10,5 +10,5 @@ conda run --no-capture-output -p ./envs/mfa python -u align.py
 conda run --no-capture-output -p ./envs/ptsed python -u infer_sound.py
 
 # Get emotions
-conda run -p ./envs/emotion python get_emotion.py
+conda run --no-capture-output -p ./envs/emotion python get_emotion.py
 
