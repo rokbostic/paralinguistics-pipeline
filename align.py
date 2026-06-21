@@ -56,6 +56,7 @@ def main(texts_file, output_dir):
         for i in range(0, len(filepaths), BATCH_SIZE):
             batch = filepaths[i:i + BATCH_SIZE]
             align(batch)
+            #shutil.rmtree("~/Documents/MFA")
             pbar.update(len(batch))
 
 

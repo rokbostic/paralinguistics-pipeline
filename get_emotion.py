@@ -114,18 +114,21 @@ def emotions_huggingface(model_str):
     model.eval()
     print(model.config.id2label)
 
-    corpus_dir = Path("outputs/corpus")
+    audio_dir = Path("audio")
 
     output_file = Path("outputs/emotions_"+model_str) 
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    files = sorted(corpus_dir.rglob("*.flac"))
+    done = {line.partition(" ")[0] for line in output_file.open()} if output_file.exists() else set()
 
-    with open(output_file, "w", encoding="utf-8") as f:
-        for file_path in files:
+    filepaths = sorted(str(f) for f in audio_dir.rglob("*.flac"))
+    filepaths = [p for p in filepaths if Path(p).stem not in done]
+
+    with open(output_file, "a", encoding="utf-8") as f:
+        for filepath in tqdm(filepaths):
             # Load 24 kHz FLAC and resample to 16 kHz
             audio, _ = librosa.load(
-                file_path,
+                filepath,
                 sr=16000,
                 mono=True
             )
@@ -147,8 +150,9 @@ def emotions_huggingface(model_str):
 
             emotion = EMOTION_MAP.get(emotion, "drugo")
 
-            key = file_path.stem
+            key = Path(filepath).stem
             f.write(f"{key} {emotion}\n")
+            f.flush()
 
 if __name__ == "__main__":
 
