@@ -85,36 +85,44 @@ def merge(filename_suffix):
 
 
 def add_medmet(filename_suffix):
+    audio_dir = Path("outputs/audio")
+    
     medmet_dir = Path("outputs/medmet_aligner")
     sed_dir = Path("outputs/sed" + filename_suffix)
 
     output_dir = Path("outputs/sed_medmet" + filename_suffix)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    filepaths = sorted(medmet_dir.glob("*.csv"))
+    filepaths = sorted(audio_dir.rglob("*.flac"))
 
     for filepath in tqdm(filepaths):
         if filepath.stem == "alignment_analysis":
             continue
 
         utt = filepath.stem
+        medmet_file = medmet_dir / f"{utt}.csv"
         sed_file = sed_dir / f"{utt}.csv"
         output_file = output_dir / f"{utt}.csv"
 
-        medmet_events = pd.read_csv(filepath)
+        if not medmet_file.exists():
+            medmet_events = pd.DataFrame(columns=SED_COLUMNS)
+        else:
+            try:
+                medmet_events = pd.read_csv(medmet_file)
+            except pd.errors.EmptyDataError:
+                #print(f"Empty medmet file: {medmet_file}")
+                output_events = pd.DataFrame(columns=SED_COLUMNS)
 
-        # handle missing SED file
         if not sed_file.exists():
             output_events = pd.DataFrame(columns=SED_COLUMNS)
 
-        # handle empty SED file
         else:
             try:
                 output_events = pd.read_csv(sed_file)
             except pd.errors.EmptyDataError:
-                print(f"Empty SED file: {sed_file}")
+                #print(f"Empty SED file: {sed_file}")
                 output_events = pd.DataFrame(columns=SED_COLUMNS)
-
+        
         for col in SED_COLUMNS:
             if col not in output_events.columns:
                 output_events[col] = pd.Series(dtype="object")

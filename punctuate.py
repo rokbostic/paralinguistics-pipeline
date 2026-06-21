@@ -31,14 +31,7 @@ def textgrid2csv(aligner_dir: Path):
             .to_csv(filepath.with_suffix(".csv"), index=False)
         )
 
-def main():
-
-    aligner_dir = Path("outputs/aligner")
-    textgrid2csv(aligner_dir)
-
-    aligner_dir = Path("outputs/medmet_aligner")
-    textgrid2csv(aligner_dir)
-
+def punctuate():
     with open("text") as f:
         text = {utt: txt for utt, txt in ([line.split()[0], " ".join(line.split()[1:])] for line in f)}
 
@@ -62,12 +55,15 @@ def main():
     for filepath in tqdm(filepaths):
 
         try:
-
             words_file = word_events_folder / filepath.with_suffix(".csv").name
             output_file = output_folder / filepath.with_suffix(".csv").name
             utt = words_file.stem
 
-            punctuated = re.split(r"\s+",text[utt])
+            original_text = text.get(utt)
+            if original_text == None:
+                continue
+
+            punctuated = re.split(r"\s+",original_text)
 
             new_punctuated = []
 
@@ -126,4 +122,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    aligner_dir = Path("outputs/aligner")
+    textgrid2csv(aligner_dir)
+
+    aligner_dir = Path("outputs/medmet_aligner")
+    textgrid2csv(aligner_dir)
+
+    punctuate()
