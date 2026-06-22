@@ -35,15 +35,18 @@ EMOTION_MAP = {
     # else: "drugo"
 }
 
-BATCH_SIZE = 64
+BATCH_SIZE = 128
 
 def emotions_emotion2vec():
     model_id = "iic/emotion2vec_plus_large"
-    model = AutoModel(model=model_id, hub="ms")
-
+    model = AutoModel(
+        model=model_id,
+        hub="ms",
+        device="cuda:0",
+    )
     audio_dir = Path("audio")
 
-    output_file = Path("outputs/emotions_emotion2vec")
+    output_file = Path("outputs/emotions_emotion2vec_prob")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     done = {line.partition(" ")[0] for line in output_file.open()} if output_file.exists() else set()
@@ -60,9 +63,15 @@ def emotions_emotion2vec():
 
                 for item in result:
                     key = item["key"]
-                    emotion = max(zip(item["scores"], item["labels"]))[1].split("/")[-1]
+                    prob, best_label = max(
+                        zip(item["scores"], item["labels"]),
+                        key=lambda x: x[0]
+                    )
+
+                    emotion = best_label.split("/")[-1]
                     emotion = EMOTION_MAP.get(emotion, "drugo")
-                    f.write(f"{key} {emotion}\n")
+
+                    f.write(f"{key} {emotion} {prob:.6f}\n")
 
                 f.flush()
                 pbar.update(len(batch))
@@ -226,9 +235,9 @@ def emotions_huggingface(model_str, batch_size=16):
 if __name__ == "__main__":
 
     # IMPLEMENTED emotion2vec, sensevoice, hubert, wav2vec2 
-    MODEL_NAME = "wav2vec2"
+    MODEL_NAME = "emotion2vec"
 
-    if MODEL_NAME == "emotion2vec": # implements batching
+    if MODEL_NAME == "emotion2vec": # implements batching + probs
         emotions_emotion2vec()
 
 
