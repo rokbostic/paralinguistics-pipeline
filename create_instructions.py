@@ -6,7 +6,7 @@ def mean(values):
 def main():
     emotion_dict = {}
 
-    with open(Path("outputs/emotion2vec_prob"), "r", encoding="utf-8") as f:
+    with open(Path("outputs/emotions_emotion2vec_prob"), "r", encoding="utf-8") as f:
         for line in f:
             file_id, label, score = line.strip().split()
             emotion_dict[file_id] = {
@@ -44,7 +44,7 @@ def main():
             speed_str = "hitro" if speed > speaking_rate_avg else "počasi"
             arousal_str = "vzburjeno" if arousal > arousal_avg else "nevzburjeno"
 
-            emotion_text = f" in v čustvu {emotion}" if prob > .9 else ""
+            emotion_text = f" in v čustvu {emotion}" if prob > .9 and emotion != "drugo" else ""
             instruction = f"Govori {speed_str} in {arousal_str}{emotion_text}."
 
             f.write(f"{utt} {instruction}\n")
